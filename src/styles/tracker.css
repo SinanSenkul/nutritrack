@@ -1,0 +1,93 @@
+.main_holder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(203, 193, 193, 0.25);
+    color: white;
+    width: 25rem;
+    height: 20rem;
+    margin-top: 2rem;
+    border-radius: 0.5rem;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    padding: 1rem;
+}
+
+.status_data_holder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+span {
+    margin: 0.5rem;
+}
+
+.status_button_holder {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.status_button_holder button {
+    cursor: pointer;
+    background-color: #0066EE;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    height: 1.75rem;
+    width: 8rem;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: medium;
+    text-align: center;
+}
+
+.addMeal_meals {
+    display: flex;
+    flex-direction: column;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: medium;
+    width: 100%;
+}
+
+.addMeal_search_holder{
+    display: flex;
+    flex-direction: row;
+    width: 90%;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.addMeal_meal_detail {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    justify-content: space-around;
+}
+
+.addMeal_button {
+    cursor: pointer;
+    background-color: #0066EE;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    height: 1.75rem;
+    width: 5rem;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: medium;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#addMeal_search_button{
+    height: 1.75rem;
+    width: 5rem;
+}
+
+.addMeal_meal_input{
+    width: 2rem;
+}
