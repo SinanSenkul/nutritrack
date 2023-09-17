@@ -1,1 +1,3 @@
-# nutritrack
+- an app that tracks the remaining calories, protein, vitamin c and all other nutrients circling in the bloodstream at the moment.
+- user can add default meals / activities, can create his own foods / activities.
+- different than other popular tracking apps, nutritrack gives you a more professional information about your current state, ie. if you're an athlete you have to know if your body has enough carbs before starting a workout
