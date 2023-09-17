@@ -153,7 +153,7 @@ export default function Tracker() {
                                     <div>
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                                             <DemoContainer components={['DatePicker']}>
-                                                <DatePicker value={value} onChange={(newValue) => setValue(newValue)} />
+                                                <DatePicker value={dateVal} onChange={(newValue) => setDateVal(newValue)} />
                                             </DemoContainer>
                                         </LocalizationProvider>
                                     </div>
