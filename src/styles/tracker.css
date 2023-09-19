@@ -3,7 +3,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    background-color: rgba(203, 193, 193, 0.25);
+    background-color: rgba(227, 217, 217, 0.25);
     color: white;
     width: 25rem;
     height: 20rem;
@@ -62,10 +62,23 @@ span {
 
 .addMeal_meal_detail {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     width: 100%;
     justify-content: space-around;
+    color: white;
+}
+
+.addMeal_date_holder{
+    color: white;
+}
+
+.addMeal_meal_qty{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
 }
 
 .addMeal_button {

@@ -4,7 +4,9 @@ import seedMeals from '../seedMeals';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import dayjs from "dayjs";
+import { timeClockClasses } from "@mui/x-date-pickers";
 
 export default function Tracker() {
     const storedMeals = JSON.parse(window.localStorage.getItem("meals"))
@@ -17,8 +19,8 @@ export default function Tracker() {
     var [search, setSearch] = useState('');
     var [grams, setGrams] = useState(0);
     var [checked, setChecked] = useState(false);
-    var [lastEatenMeals, setLastEatenMeals] = useState([]);
-    var [dateVal, setDateVal] = useState(null);
+    var [eatenMeals, setEatenMeals] = useState([]);
+    var [timeVal, setTimeVal] = useState(dayjs(new Date()));
 
     function handleCheck() {
         setChecked(!checked);
@@ -39,7 +41,7 @@ export default function Tracker() {
         setSearch('');
     }
 
-    var timeOut;
+    /* var timeOut;
     function nutriReducer() {
         timeOut = setTimeout(() => {
             if (remCal > 1.5625) {
@@ -52,11 +54,51 @@ export default function Tracker() {
                 setRemVitc(remVitc - 0.0625);
             }
         }, 60000)
+    } */
+
+    function setRemainingNutrients() {
+        let newRemCal = 0;
+        let newRemPrt = 0;
+        let newRemVitc = 0;
+        eatenMeals.map(meal => {
+            console.log('first meal remaining calories ' + meal.cal)
+            newRemCal = newRemCal + meal.cal;
+            newRemPrt = newRemPrt + meal.prt;
+            newRemVitc = newRemVitc + meal.vitc;
+        })
+        console.log('remcal: ' + remCal)
+        setRemCal(newRemCal);
+        setRemPrt(newRemPrt);
+        setRemVitc(newRemVitc);
+        let newEatenMeals = eatenMeals;
+        eatenMeals.map((meal, i) => {
+            if (meal.cal > 0 && meal.prt > 0 && meal.vitc > 0) {
+                newEatenMeals.push(meal)
+            }
+        })
+        setEatenMeals(newEatenMeals);
     }
 
-    useEffect(() => {
-        nutriReducer();
-    });
+    var timeOut;
+    function nutrReducer() {
+        timeOut = setTimeout(() => {
+            let newEatenMeals = eatenMeals;
+            newEatenMeals.map(meal => {
+                if (meal.cal > 1.5625) {
+                    meal.cal = meal.cal - 1.5625;
+                }
+                if (meal.prt > 0.1171) {
+                    meal.prt = meal.prt - 0.1171;
+                }
+                if (meal.vitc > 0.0625) {
+                    meal.vitc = meal.vitc - 0.0625;
+                }
+            })
+            console.log('eatenmeals: ' + newEatenMeals)
+            setEatenMeals(newEatenMeals);
+            setRemainingNutrients();
+        }, 1000)
+    }
 
     function addMeal(i) {
         let c = grams / 100;
@@ -75,6 +117,7 @@ export default function Tracker() {
             vitc = 0;
         }
         let lastMeal = {
+            date: (timeVal),
             cal: cal,
             fat: fat,
             chol: chol,
@@ -86,13 +129,7 @@ export default function Tracker() {
             pts: pts,
             vitc: vitc
         }
-        setLastEatenMeals(current => [...current, lastMeal])
-        console.log('lastmeal: ' + lastMeal)
-        console.log('lasteatenmeals: ' + lastEatenMeals);
-        console.log('length of lasteatenmeals: ' + lastEatenMeals.length)
-        setRemCal(remCal + cal);
-        setRemPrt(remPrt + prt);
-        setRemVitc(remVitc + vitc);
+        setEatenMeals(current => [...current, lastMeal])
         handleBack();
     }
 
@@ -100,27 +137,9 @@ export default function Tracker() {
         setGrams(grams = e.target.value);
     }
 
-    function undoMeal() {
-        let newLastEatenMeals = lastEatenMeals;
-        if (newLastEatenMeals.length > 0) {
-            let lastMeal = newLastEatenMeals[newLastEatenMeals.length - 1];
-            console.log('meal to be deleted: ' + lastMeal)
-            let cal = lastMeal.cal;
-            let prt = lastMeal.prt;
-            let vitc = lastMeal.vitc;
-            if (remCal > cal) {
-                setRemCal(remCal - cal);
-            }
-            if (remPrt > prt) {
-                setRemPrt(remPrt - prt);
-            }
-            if (remVitc > vitc) {
-                setRemVitc(remVitc - vitc);
-            }
-            newLastEatenMeals.pop();
-            setLastEatenMeals(newLastEatenMeals);
-        }
-    }
+    useEffect(() => {
+        nutrReducer();
+    });
 
     return (
         <div>
@@ -135,7 +154,7 @@ export default function Tracker() {
                     <div className="status_button_holder">
                         <button onClick={() => setVisiblePage('addMeal')}>add meal</button>
                         <button>add activity</button>
-                        <button onClick={undoMeal}>undo meal</button>
+                        <button onClick={() => setVisiblePage('editMeals')}>edit meals</button>
                     </div>
                 </div>
             }
@@ -150,14 +169,21 @@ export default function Tracker() {
                         <div className="addMeal_meals">
                             {searchedMeals.map((meal, i) =>
                                 <div className="addMeal_meal_detail">
-                                    <div>
+                                    <div className="addMeal_date_holder">
                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                            <DemoContainer components={['DatePicker']}>
-                                                <DatePicker value={dateVal} onChange={(newValue) => setDateVal(newValue)} />
+                                            <DemoContainer components={['TimePicker']}>
+                                                <TimePicker
+                                                    value={timeVal}
+                                                    onChange={(newValue) => setTimeVal(newValue)}
+                                                    sx={{
+                                                        backgroundColor: 'white',
+                                                        fontSize: 'medium',
+                                                    }}
+                                                />
                                             </DemoContainer>
                                         </LocalizationProvider>
                                     </div>
-                                    <div>
+                                    <div className="addMeal_meal_qty">
                                         <p>{meal.name}</p>
                                         <span><input type="text" className="addMeal_meal_input" onChange={handleGrams}></input> grams</span>
                                         <label>
@@ -176,6 +202,12 @@ export default function Tracker() {
                     }
                     <button onClick={handleBack} className="addMeal_button">back</button>
                 </div>
+            }
+            {(visiblePage==='editMeals') &&
+            <div className="mainholder">
+                
+                <button onClick={handleBack} className="addMeal_button">back</button>
+            </div>
             }
         </div>
     )
