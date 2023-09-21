@@ -6,7 +6,6 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from "dayjs";
-import { timeClockClasses } from "@mui/x-date-pickers";
 
 export default function Tracker() {
     const storedMeals = JSON.parse(window.localStorage.getItem("meals"))
@@ -41,68 +40,45 @@ export default function Tracker() {
         setSearch('');
     }
 
-    /* var timeOut;
-    function nutriReducer() {
-        timeOut = setTimeout(() => {
-            if (remCal > 1.5625) {
-                setRemCal(remCal - 1.5625);
-            }
-            if (remPrt > 0.1171) {
-                setRemPrt(remPrt - 0.1171);
-            }
-            if (remVitc > 0.0625) {
-                setRemVitc(remVitc - 0.0625);
-            }
-        }, 60000)
-    } */
-
-    function setRemainingNutrients() {
-        let newRemCal = 0;
-        let newRemPrt = 0;
-        let newRemVitc = 0;
-        eatenMeals.map(meal => {
-            console.log('first meal remaining calories ' + meal.cal)
-            newRemCal = newRemCal + meal.cal;
-            newRemPrt = newRemPrt + meal.prt;
-            newRemVitc = newRemVitc + meal.vitc;
-        })
-        console.log('remcal: ' + remCal)
-        setRemCal(newRemCal);
-        setRemPrt(newRemPrt);
-        setRemVitc(newRemVitc);
-        let newEatenMeals = eatenMeals;
-        eatenMeals.map((meal, i) => {
-            if (meal.cal > 0 && meal.prt > 0 && meal.vitc > 0) {
-                newEatenMeals.push(meal)
-            }
-        })
-        setEatenMeals(newEatenMeals);
-    }
-
-    var timeOut;
-    function nutrReducer() {
-        timeOut = setTimeout(() => {
+    /* var timeOut = null; */
+    function foodDigest() {
+        if (eatenMeals.length > 0) {
             let newEatenMeals = eatenMeals;
-            newEatenMeals.map(meal => {
-                if (meal.cal > 1.5625) {
-                    meal.cal = meal.cal - 1.5625;
-                }
-                if (meal.prt > 0.1171) {
-                    meal.prt = meal.prt - 0.1171;
-                }
-                if (meal.vitc > 0.0625) {
-                    meal.vitc = meal.vitc - 0.0625;
-                }
+            console.log('first meals remaining calories: ' + newEatenMeals[0].cal);
+            newEatenMeals[0].cal = newEatenMeals[0].cal - (1.5625 * (dayjs(new Date()) - newEatenMeals[0].date) / 60 / 1000);
+            newEatenMeals[0].prt = newEatenMeals[0].prt - (0.1171 * (dayjs(new Date()) - newEatenMeals[0].date) / 60 / 1000);
+            newEatenMeals[0].vitc = newEatenMeals[0].vitc - (0.0625 * (dayjs(new Date()) - newEatenMeals[0].date) / 60 / 1000);
+            if (newEatenMeals[0].cal < 0) {
+                newEatenMeals[0].cal = 0;
+            }
+            if (newEatenMeals[0].prt < 0) {
+                newEatenMeals[0].prt = 0;
+            }
+            if (newEatenMeals[0].vitc < 0) {
+                newEatenMeals[0].vitc = 0;
+            }
+            if (newEatenMeals[0].cal === 0 && newEatenMeals[0].prt === 0 && newEatenMeals[0].vitc === 0) {
+                newEatenMeals.shift();
+            }
+            let newRemCal = 0;
+            let newRemPrt = 0;
+            let newRemVitc = 0;
+            newEatenMeals.map((meal) => {
+                newRemCal = newRemCal + meal.cal;
+                newRemPrt = newRemPrt + meal.prt;
+                newRemVitc = newRemVitc + meal.vitc;
             })
-            console.log('eatenmeals: ' + newEatenMeals)
             setEatenMeals(newEatenMeals);
-            setRemainingNutrients();
-        }, 1000)
+            setRemCal(newRemCal);
+            setRemPrt(newRemPrt);
+            setRemVitc(newRemVitc);
+        }
     }
 
     function addMeal(i) {
         let c = grams / 100;
         let meal = searchedMeals[i];
+        let name = meal.name;
         let cal = meal.cal * c;
         let fat = meal.fat * c;
         let chol = meal.chol * c;
@@ -117,6 +93,7 @@ export default function Tracker() {
             vitc = 0;
         }
         let lastMeal = {
+            name: name,
             date: (timeVal),
             cal: cal,
             fat: fat,
@@ -129,7 +106,7 @@ export default function Tracker() {
             pts: pts,
             vitc: vitc
         }
-        setEatenMeals(current => [...current, lastMeal])
+        setEatenMeals(current => [...current, lastMeal]);
         handleBack();
     }
 
@@ -138,8 +115,10 @@ export default function Tracker() {
     }
 
     useEffect(() => {
-        nutrReducer();
-    });
+        const interval = setInterval(foodDigest, 1000);
+        return () => clearInterval(interval); // This represents the unmount function, in which you need to clear your interval to prevent memory leaks.
+    })
+
 
     return (
         <div>
@@ -203,11 +182,13 @@ export default function Tracker() {
                     <button onClick={handleBack} className="addMeal_button">back</button>
                 </div>
             }
-            {(visiblePage==='editMeals') &&
-            <div className="mainholder">
-                
-                <button onClick={handleBack} className="addMeal_button">back</button>
-            </div>
+            {(visiblePage === 'editMeals') &&
+                <div className="main_holder">
+                    {eatenMeals.map(meal =>
+                        <p className="editMeals_meal">{meal.name}-{Math.round(meal.cal)}</p>
+                    )}
+                    <button onClick={handleBack} className="addMeal_button">back</button>
+                </div>
             }
         </div>
     )
