@@ -45,9 +45,11 @@ export default function Tracker() {
         if (eatenMeals.length > 0) {
             let newEatenMeals = eatenMeals;
             console.log('first meals remaining calories: ' + newEatenMeals[0].cal);
-            newEatenMeals[0].cal = newEatenMeals[0].cal - (1.5625 * (dayjs(new Date()) - newEatenMeals[0].date) / 60 / 1000);
-            newEatenMeals[0].prt = newEatenMeals[0].prt - (0.1171 * (dayjs(new Date()) - newEatenMeals[0].date) / 60 / 1000);
-            newEatenMeals[0].vitc = newEatenMeals[0].vitc - (0.0625 * (dayjs(new Date()) - newEatenMeals[0].date) / 60 / 1000);
+            if (dayjs(new Date()) > newEatenMeals[0].date) {
+                newEatenMeals[0].cal = newEatenMeals[0].cal - (1.5625 * (dayjs(new Date()) - newEatenMeals[0].date) / 60 / 1000);
+                newEatenMeals[0].prt = newEatenMeals[0].prt - (0.1171 * (dayjs(new Date()) - newEatenMeals[0].date) / 60 / 1000);
+                newEatenMeals[0].vitc = newEatenMeals[0].vitc - (0.0625 * (dayjs(new Date()) - newEatenMeals[0].date) / 60 / 1000);
+            }
             if (newEatenMeals[0].cal < 0) {
                 newEatenMeals[0].cal = 0;
             }
@@ -114,11 +116,23 @@ export default function Tracker() {
         setGrams(grams = e.target.value);
     }
 
+    function deleteEatenMeal(i) {
+        console.log('deleteeanmeal func ran')
+        let newEatenMeals = eatenMeals;
+        newEatenMeals.splice(i, 1);
+        setEatenMeals(newEatenMeals);
+        if (newEatenMeals.length === 0) {
+            setVisiblePage('status');
+            setRemCal(0);
+            setRemPrt(0);
+            setRemVitc(0);
+        }
+    }
+
     useEffect(() => {
         const interval = setInterval(foodDigest, 1000);
-        return () => clearInterval(interval); // This represents the unmount function, in which you need to clear your interval to prevent memory leaks.
+        return () => clearInterval(interval);
     })
-
 
     return (
         <div>
@@ -141,7 +155,7 @@ export default function Tracker() {
                 <div className="main_holder">
                     <p><b>search meal:</b></p>
                     <div className="addMeal_search_holder">
-                        <input type="text" onChange={handleSearch}></input>
+                        <input type="text" onChange={handleSearch} className="addMeal_search_input"></input>
                         <button onClick={findMeals} className="addMeal_button" id="addMeal_search_button">search</button>
                     </div>
                     {searchedMeals.length > 0 &&
@@ -157,6 +171,7 @@ export default function Tracker() {
                                                     sx={{
                                                         backgroundColor: 'white',
                                                         fontSize: 'medium',
+                                                        borderRadius: '10px',
                                                     }}
                                                 />
                                             </DemoContainer>
@@ -184,9 +199,17 @@ export default function Tracker() {
             }
             {(visiblePage === 'editMeals') &&
                 <div className="main_holder">
-                    {eatenMeals.map(meal =>
-                        <p className="editMeals_meal">{meal.name}-{Math.round(meal.cal)}</p>
-                    )}
+                    {eatenMeals &&
+                        eatenMeals.map((meal, i) =>
+                            <div>
+                                <p className="editMeals_meal">{meal.name}-{Math.round(meal.cal)}</p>
+                                <button onClick={() => deleteEatenMeal(i)}>delete</button>
+                            </div>
+                        )
+                    }
+                    {eatenMeals.length===0 &&
+                        <p>there is no food in your system</p>
+                    }
                     <button onClick={handleBack} className="addMeal_button">back</button>
                 </div>
             }
