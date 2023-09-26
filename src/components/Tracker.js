@@ -7,7 +7,8 @@ import AddMeal from "./AddMeal";
 import EditMeals from "./EditMeals";
 
 export default function Tracker() {
-    const storedMeals = JSON.parse(window.localStorage.getItem("meals"))
+    var storedMeals = JSON.parse(window.localStorage.getItem("meals"));
+    var storedEatenMeals = JSON.parse(window.localStorage.getItem("eatenmeals"));
     var [meals, setMeals] = useState(storedMeals || seedMeals);
     var [remCal, setRemCal] = useState(0);
     var [remPrt, setRemPrt] = useState(0);
@@ -17,8 +18,13 @@ export default function Tracker() {
     var [search, setSearch] = useState('');
     var [grams, setGrams] = useState(0);
     var [checked, setChecked] = useState(false);
-    var [eatenMeals, setEatenMeals] = useState([]);
+    var [eatenMeals, setEatenMeals] = useState(storedEatenMeals || []);
     var [timeVal, setTimeVal] = useState(dayjs(new Date()));
+
+    function syncLocalStorage() {
+        window.localStorage.setItem("meals", JSON.stringify(meals));
+        window.localStorage.setItem("eatenmeals", JSON.stringify(eatenMeals));
+    }
 
     function handleCheck() {
         setChecked(!checked);
@@ -43,11 +49,10 @@ export default function Tracker() {
     function foodDigest() {
         if (eatenMeals.length > 0) {
             let newEatenMeals = eatenMeals;
-            console.log('first meals remaining calories: ' + newEatenMeals[0].cal);
             if (dayjs(new Date()) > newEatenMeals[0].date) {
-                newEatenMeals[0].cal = newEatenMeals[0].cal - (1.5625 * (dayjs(new Date()) - newEatenMeals[0].date) / 60 / 1000);
-                newEatenMeals[0].prt = newEatenMeals[0].prt - (0.1171 * (dayjs(new Date()) - newEatenMeals[0].date) / 60 / 1000);
-                newEatenMeals[0].vitc = newEatenMeals[0].vitc - (0.0625 * (dayjs(new Date()) - newEatenMeals[0].date) / 60 / 1000);
+                newEatenMeals[0].cal = newEatenMeals[0].cal - (1.5625 * (dayjs(new Date()) - newEatenMeals[0].date) / 10000000);
+                newEatenMeals[0].prt = newEatenMeals[0].prt - (0.1171 * (dayjs(new Date()) - newEatenMeals[0].date) / 10000000);
+                newEatenMeals[0].vitc = newEatenMeals[0].vitc - (0.0625 * (dayjs(new Date()) - newEatenMeals[0].date) / 10000000);
             }
             if (newEatenMeals[0].cal < 0) {
                 newEatenMeals[0].cal = 0;
@@ -73,6 +78,7 @@ export default function Tracker() {
             setRemCal(newRemCal);
             setRemPrt(newRemPrt);
             setRemVitc(newRemVitc);
+            syncLocalStorage();
         }
     }
 
@@ -96,7 +102,7 @@ export default function Tracker() {
             }
             let lastMeal = {
                 name: name,
-                date: (timeVal),
+                date: ''+(timeVal)+'',
                 cal: cal,
                 fat: fat,
                 chol: chol,
@@ -111,6 +117,7 @@ export default function Tracker() {
             setEatenMeals(current => [...current, lastMeal]);
             handleBack();
             setTimeVal(dayjs(new Date()));
+            syncLocalStorage();
         }
     }
 
@@ -119,7 +126,6 @@ export default function Tracker() {
     }
 
     function deleteEatenMeal(i) {
-        console.log('deleteeanmeal func ran')
         let newEatenMeals = eatenMeals;
         newEatenMeals.splice(i, 1);
         setEatenMeals(newEatenMeals);
@@ -128,6 +134,7 @@ export default function Tracker() {
             setRemPrt(0);
             setRemVitc(0);
         }
+        syncLocalStorage();
     }
 
     useEffect(() => {
