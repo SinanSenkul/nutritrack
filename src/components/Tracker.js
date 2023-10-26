@@ -17,7 +17,6 @@ export default function Tracker() {
     var [searchedMeals, setSearchedMeals] = useState([]);
     var [search, setSearch] = useState('');
     var [grams, setGrams] = useState(0);
-    var [checked, setChecked] = useState(false);
     var [eatenMeals, setEatenMeals] = useState(storedEatenMeals || []);
     var [timeVal, setTimeVal] = useState(dayjs(new Date()));
 
@@ -26,12 +25,15 @@ export default function Tracker() {
         window.localStorage.setItem("eatenmeals", JSON.stringify(eatenMeals));
     }
 
-    function handleCheck() {
-        setChecked(!checked);
-    };
-
     function findMeals() {
-        let searchRes = meals.filter(meal => meal.name === search);
+        /* setMeals(JSON.parse(window.localStorage.getItem("meals"))); */
+        /* let searchRes = meals.filter(meal => meal.name === search); */
+        let searchRes = [];
+        meals.map((meal) => {
+            if (meal.name.includes(search)){
+                searchRes.push(meal)
+            }
+        })
         setSearchedMeals(searchRes);
     }
 
@@ -43,7 +45,7 @@ export default function Tracker() {
         setVisiblePage('status');
         setSearchedMeals([]);
         setSearch('');
-        setTimeVal(dayjs(new Date()))
+        setTimeVal(dayjs(new Date()));
     }
 
     function foodDigest() {
@@ -97,12 +99,9 @@ export default function Tracker() {
             let irn = meal.irn * c;
             let pts = meal.pts * c;
             let vitc = meal.vitc * c;
-            if (checked) {
-                vitc = 0;
-            }
             let lastMeal = {
                 name: name,
-                date: ''+(timeVal)+'',
+                date: '' + (timeVal) + '',
                 cal: cal,
                 fat: fat,
                 chol: chol,
@@ -160,8 +159,6 @@ export default function Tracker() {
                     timeVal={timeVal}
                     setTimeVal={setTimeVal}
                     handleGrams={handleGrams}
-                    checked={checked}
-                    handleCheck={handleCheck}
                     addMeal={addMeal}
                     handleBack={handleBack}
                 />
